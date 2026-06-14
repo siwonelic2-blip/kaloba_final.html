@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MBA Kaloba Loan System</title>
-    <link rel="icon" type="image/png" href="favicon.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
@@ -20,16 +19,12 @@
         .save-btn { background: #2e7d32; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; background: white; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .export-btn { background: #1976d2; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="login-screen">
         <h2>MBA Kaloba Loan Login</h2>
-        <p>Select your name to start</p>
         <select id="userSelect">
             <option value="">-- Choose Owner --</option>
             <option value="Friday">Friday Chisupa (Lusaka)</option>
@@ -39,52 +34,44 @@
         <button class="save-btn" onclick="handleLogin()">Login to System</button>
     </div>
 
-    <!-- MAIN APP AREA -->
     <div id="mainApp" class="main-content">
         <div class="header">
-            <div>
-                <h2 id="welcomeText">MBA Kaloba</h2>
-                <small id="locationText"></small>
-            </div>
-            <button onclick="location.reload()" style="background:none; border:1px solid white; color:white; padding:5px; border-radius:3px; cursor:pointer;">Logout</button>
+            <div><h2 id="welcomeText">MBA Kaloba</h2><small id="locationText"></small></div>
+            <button onclick="location.reload()" style="background:none; border:1px solid white; color:white; padding:5px; border-radius:3px;">Logout</button>
         </div>
-
         <div class="menu">
-            <button class="menu-btn" onclick="showSection('regSection')">👤 Register Client</button>
-            <button class="menu-btn" onclick="showSection('loanSection')">💵 Record Loan</button>
-            <button class="menu-btn" onclick="showSection('repaySection')">💳 Repayment</button>
-            <button class="menu-btn" onclick="showSection('viewSection')">📊 View Records</button>
+            <button class="menu-btn" onclick="showSection('regSection')">👤 Register</button>
+            <button class="menu-btn" onclick="showSection('loanSection')">💵 Loan</button>
+            <button class="menu-btn" onclick="showSection('repaySection')">💳 Repay</button>
+            <button class="menu-btn" onclick="showSection('viewSection')">📊 Records</button>
         </div>
 
-        <!-- SECTIONS -->
         <div id="regSection" class="content-section">
-            <h3>Register New Client</h3>
-            <input type="text" id="regName" placeholder="Client Full Name">
-            <input type="text" id="regPhone" placeholder="Phone Number">
-            <button class="save-btn" onclick="saveClient()">Save Client</button>
+            <h3>Register Client</h3>
+            <input type="text" id="regName" placeholder="Full Name">
+            <input type="text" id="regPhone" placeholder="Phone">
+            <button class="save-btn" onclick="saveClient()">Save to Cloud</button>
         </div>
 
         <div id="loanSection" class="content-section">
-            <h3>Record New Loan</h3>
-            <select id="loanClientSelect"><option>Select Client</option></select>
-            <input type="number" id="loanAmount" placeholder="Amount Borrowed (K)">
-            <input type="number" id="loanInterest" placeholder="Interest Rate (%)">
+            <h3>Record Loan</h3>
+            <select id="loanClientSelect"></select>
+            <input type="number" id="loanAmount" placeholder="Amount (K)">
+            <input type="number" id="loanInterest" placeholder="Interest %">
             <button class="save-btn" onclick="saveLoan()">Approve Loan</button>
         </div>
 
         <div id="repaySection" class="content-section">
             <h3>Record Repayment</h3>
-            <select id="repayClientSelect"><option>Select Client</option></select>
+            <select id="repayClientSelect"></select>
             <input type="number" id="repayAmount" placeholder="Amount Paid (K)">
             <button class="save-btn" onclick="saveRepayment()">Save Payment</button>
         </div>
 
         <div id="viewSection" class="content-section active">
-            <button class="export-btn" onclick="exportToExcel()">📊 Download Excel Report</button>
+            <button class="menu-btn" style="background:#1976d2" onclick="renderTable()">🔄 Refresh Data</button>
             <table>
-                <thead>
-                    <tr><th>Client</th><th>Borrowed</th><th>Interest</th><th>Total Due</th><th>Paid</th><th>Balance</th></tr>
-                </thead>
+                <thead><tr><th>Client</th><th>Borrowed</th><th>Total Due</th><th>Paid</th><th>Balance</th><th>Recorded By</th></tr></thead>
                 <tbody id="loanTableBody"></tbody>
             </table>
         </div>
@@ -92,28 +79,18 @@
 </div>
 
 <script>
-    let clients = JSON.parse(localStorage.getItem('mba_clients')) || [];
-    let loans = JSON.parse(localStorage.getItem('mba_loans')) || [];
+    const SCRIPT_URL = "PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE";
     let activeUser = "";
 
-    function handleLogin() {
+    async function handleLogin() {
         activeUser = document.getElementById('userSelect').value;
-        if(!activeUser) return alert("Please select your name");
-        
+        if(!activeUser) return alert("Select Name");
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         document.getElementById('welcomeText').innerText = "Owner: " + activeUser;
-        
-        let loc = "";
-        if (activeUser === "Friday" || activeUser === "Beatrice") {
-            loc = "Location: Lusaka";
-        } else if (activeUser === "Alex") {
-            loc = "Location: Kitwe";
-        }
-        document.getElementById('locationText').innerText = loc;
-        
-        updateDropdowns();
-        renderTable();
+        document.getElementById('locationText').innerText = (activeUser === "Alex") ? "Kitwe" : "Lusaka";
+        await updateDropdowns();
+        await renderTable();
     }
 
     function showSection(id) {
@@ -121,67 +98,50 @@
         document.getElementById(id).classList.add('active');
     }
 
-    function saveClient() {
-        let name = document.getElementById('regName').value;
+    async function saveClient() {
+        const name = document.getElementById('regName').value;
         if(!name) return;
-        clients.push(name);
-        localStorage.setItem('mba_clients', JSON.stringify(clients));
-        alert("Client Registered!");
-        document.getElementById('regName').value = "";
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'addClient', name, phone: document.getElementById('regPhone').value })});
+        alert("Saved!");
         updateDropdowns();
     }
 
-    function saveLoan() {
-        let client = document.getElementById('loanClientSelect').value;
-        let amt = parseFloat(document.getElementById('loanAmount').value);
-        let intr = parseFloat(document.getElementById('loanInterest').value);
-        if(!amt || !client) return;
-
-        let total = amt + (amt * (intr/100));
-        loans.push({client, amt, intr, total, paid: 0, owner: activeUser});
-        localStorage.setItem('mba_loans', JSON.stringify(loans));
+    async function saveLoan() {
+        const client = document.getElementById('loanClientSelect').value;
+        const amt = parseFloat(document.getElementById('loanAmount').value);
+        const intr = parseFloat(document.getElementById('loanInterest').value);
+        const total = amt + (amt * (intr/100));
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'addLoan', client, amt, intr, total, owner: activeUser })});
         alert("Loan Recorded!");
         renderTable();
     }
 
-    function saveRepayment() {
-        let client = document.getElementById('repayClientSelect').value;
-        let pay = parseFloat(document.getElementById('repayAmount').value);
-        let loan = loans.find(l => l.client === client);
-        if(loan) {
-            loan.paid += pay;
-            localStorage.setItem('mba_loans', JSON.stringify(loans));
-            alert("Payment Recorded!");
-            renderTable();
-        }
+    async function saveRepayment() {
+        const client = document.getElementById('repayClientSelect').value;
+        const pay = parseFloat(document.getElementById('repayAmount').value);
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'addRepayment', client, pay })});
+        alert("Payment Recorded!");
+        renderTable();
     }
 
-    function updateDropdowns() {
+    async function updateDropdowns() {
+        const res = await fetch(SCRIPT_URL + "?action=getClients");
+        const data = await res.json();
         let html = '<option value="">-- Select Client --</option>';
-        clients.forEach(c => html += `<option value="${c}">${c}</option>`);
+        data.forEach(c => html += `<option value="${c}">${c}</option>`);
         document.getElementById('loanClientSelect').innerHTML = html;
         document.getElementById('repayClientSelect').innerHTML = html;
     }
 
-    function renderTable() {
+    async function renderTable() {
+        document.getElementById('loanTableBody').innerHTML = "Loading...";
+        const res = await fetch(SCRIPT_URL + "?action=getLoans");
+        const data = await res.json();
         let html = "";
-        loans.forEach(l => {
-            let balance = l.total - l.paid;
-            html += `<tr><td>${l.client}</td><td>K${l.amt}</td><td>${l.intr}%</td><td>K${l.total}</td><td>K${l.paid}</td><td><strong>K${balance}</strong></td></tr>`;
+        data.forEach(l => {
+            html += `<tr><td>${l.client}</td><td>K${l.amt}</td><td>K${l.total}</td><td>K${l.paid}</td><td><strong>K${l.total - l.paid}</strong></td><td>${l.owner}</td></tr>`;
         });
         document.getElementById('loanTableBody').innerHTML = html;
-    }
-
-    function exportToExcel() {
-        let blob = new Blob([document.getElementById('viewSection').innerHTML], {type: 'application/vnd.ms-excel'});
-        let url = URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url; a.download = 'MBA_Loan_Report.xls'; a.click();
-    }
-
-    // PWA Offline Support
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('https://siwonelic2-blip.github.io/MBA-Kaloba-Loan/index.html');
     }
 </script>
 </body>
