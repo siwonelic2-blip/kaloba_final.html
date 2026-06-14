@@ -2,84 +2,187 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MBA Kaloba Loan System — Professional loan management.">
     <title>MBA Kaloba Loan System</title>
-    <!-- Tab Icon -->
     <link rel="icon" type="image/png" href="favicon.png">
     <style>
-        /* Your Existing Styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .main-content { padding: 20px; }
-        .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .menu-btn { padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; min-height: 90vh; }
+        .header { background: #2c3e50; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .main-content { padding: 20px; display: none; }
+        .login-screen { padding: 50px 20px; text-align: center; display: block; }
+        .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .menu-btn { padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .content-section { display: none; background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .active { display: block; }
+        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .save-btn { background: #2e7d32; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; background: white; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        /* Professional Export Button Style */
-        .export-btn { background-color: #2e7d32; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        .export-btn { background: #1976d2; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>MBA Kaloba Loan</h1>
-            <div id="status">Status: Online</div>
-        </div>
 
-        <div class="main-content">
-            <div class="menu">
-                <button class="menu-btn" onclick="showSection('loans')">Loan Records</button>
-                <button class="menu-btn" onclick="showSection('calculator')">Calculator</button>
-            </div>
-
-            <!-- EXCEL EXPORT SECTION -->
-            <div id="loansSection">
-                <button class="export-btn" onclick="exportToExcel()">📊 Download Excel Report</button>
-                <table id="loanTable">
-                    <thead>
-                        <tr>
-                            <th>Client Name</th>
-                            <th>Amount</th>
-                            <th>Interest</th>
-                            <th>Total Due</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Data will appear here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="container">
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-screen">
+        <h2>MBA Kaloba Loan Login</h2>
+        <p>Select your name to start</p>
+        <select id="userSelect">
+            <option value="">-- Choose Owner --</option>
+            <option value="Friday">Friday Chisupa (Lusaka)</option>
+            <option value="Alex">Alex Mukosha (Kitwe)</option>
+            <option value="Beatrice">Beatrice (Lusaka)</option>
+        </select>
+        <button class="save-btn" onclick="handleLogin()">Login to System</button>
     </div>
 
-    <script>
-        // FUNCTION: EXPORT TO EXCEL
-        function exportToExcel() {
-            let table = document.getElementById("loanTable");
-            let html = table.outerHTML;
-            let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
-            let link = document.createElement("a");
-            link.download = "MBA_Kaloba_Report.xls";
-            link.href = url;
-            link.click();
-        }
+    <!-- MAIN APP AREA -->
+    <div id="mainApp" class="main-content">
+        <div class="header">
+            <div>
+                <h2 id="welcomeText">MBA Kaloba</h2>
+                <small id="locationText"></small>
+            </div>
+            <button onclick="location.reload()" style="background:none; border:1px solid white; color:white; padding:5px; border-radius:3px; cursor:pointer;">Logout</button>
+        </div>
 
-        function showSection(id) {
-            console.log("Showing section: " + id);
-        }
+        <div class="menu">
+            <button class="menu-btn" onclick="showSection('regSection')">👤 Register Client</button>
+            <button class="menu-btn" onclick="showSection('loanSection')">💵 Record Loan</button>
+            <button class="menu-btn" onclick="showSection('repaySection')">💳 Repayment</button>
+            <button class="menu-btn" onclick="showSection('viewSection')">📊 View Records</button>
+        </div>
 
-        // OFFLINE MODE (PWA) SETUP
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('https://github.io')
-                .then(reg => console.log('Offline mode active!'))
-                .catch(err => console.error('Offline setup failed', err));
-            });
+        <!-- SECTIONS -->
+        <div id="regSection" class="content-section">
+            <h3>Register New Client</h3>
+            <input type="text" id="regName" placeholder="Client Full Name">
+            <input type="text" id="regPhone" placeholder="Phone Number">
+            <button class="save-btn" onclick="saveClient()">Save Client</button>
+        </div>
+
+        <div id="loanSection" class="content-section">
+            <h3>Record New Loan</h3>
+            <select id="loanClientSelect"><option>Select Client</option></select>
+            <input type="number" id="loanAmount" placeholder="Amount Borrowed (K)">
+            <input type="number" id="loanInterest" placeholder="Interest Rate (%)">
+            <button class="save-btn" onclick="saveLoan()">Approve Loan</button>
+        </div>
+
+        <div id="repaySection" class="content-section">
+            <h3>Record Repayment</h3>
+            <select id="repayClientSelect"><option>Select Client</option></select>
+            <input type="number" id="repayAmount" placeholder="Amount Paid (K)">
+            <button class="save-btn" onclick="saveRepayment()">Save Payment</button>
+        </div>
+
+        <div id="viewSection" class="content-section active">
+            <button class="export-btn" onclick="exportToExcel()">📊 Download Excel Report</button>
+            <table>
+                <thead>
+                    <tr><th>Client</th><th>Borrowed</th><th>Interest</th><th>Total Due</th><th>Paid</th><th>Balance</th></tr>
+                </thead>
+                <tbody id="loanTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let clients = JSON.parse(localStorage.getItem('mba_clients')) || [];
+    let loans = JSON.parse(localStorage.getItem('mba_loans')) || [];
+    let activeUser = "";
+
+    function handleLogin() {
+        activeUser = document.getElementById('userSelect').value;
+        if(!activeUser) return alert("Please select your name");
+        
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('welcomeText').innerText = "Owner: " + activeUser;
+        
+        let loc = "";
+        if (activeUser === "Friday" || activeUser === "Beatrice") {
+            loc = "Location: Lusaka";
+        } else if (activeUser === "Alex") {
+            loc = "Location: Kitwe";
         }
-    </script>
+        document.getElementById('locationText').innerText = loc;
+        
+        updateDropdowns();
+        renderTable();
+    }
+
+    function showSection(id) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function saveClient() {
+        let name = document.getElementById('regName').value;
+        if(!name) return;
+        clients.push(name);
+        localStorage.setItem('mba_clients', JSON.stringify(clients));
+        alert("Client Registered!");
+        document.getElementById('regName').value = "";
+        updateDropdowns();
+    }
+
+    function saveLoan() {
+        let client = document.getElementById('loanClientSelect').value;
+        let amt = parseFloat(document.getElementById('loanAmount').value);
+        let intr = parseFloat(document.getElementById('loanInterest').value);
+        if(!amt || !client) return;
+
+        let total = amt + (amt * (intr/100));
+        loans.push({client, amt, intr, total, paid: 0, owner: activeUser});
+        localStorage.setItem('mba_loans', JSON.stringify(loans));
+        alert("Loan Recorded!");
+        renderTable();
+    }
+
+    function saveRepayment() {
+        let client = document.getElementById('repayClientSelect').value;
+        let pay = parseFloat(document.getElementById('repayAmount').value);
+        let loan = loans.find(l => l.client === client);
+        if(loan) {
+            loan.paid += pay;
+            localStorage.setItem('mba_loans', JSON.stringify(loans));
+            alert("Payment Recorded!");
+            renderTable();
+        }
+    }
+
+    function updateDropdowns() {
+        let html = '<option value="">-- Select Client --</option>';
+        clients.forEach(c => html += `<option value="${c}">${c}</option>`);
+        document.getElementById('loanClientSelect').innerHTML = html;
+        document.getElementById('repayClientSelect').innerHTML = html;
+    }
+
+    function renderTable() {
+        let html = "";
+        loans.forEach(l => {
+            let balance = l.total - l.paid;
+            html += `<tr><td>${l.client}</td><td>K${l.amt}</td><td>${l.intr}%</td><td>K${l.total}</td><td>K${l.paid}</td><td><strong>K${balance}</strong></td></tr>`;
+        });
+        document.getElementById('loanTableBody').innerHTML = html;
+    }
+
+    function exportToExcel() {
+        let blob = new Blob([document.getElementById('viewSection').innerHTML], {type: 'application/vnd.ms-excel'});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url; a.download = 'MBA_Loan_Report.xls'; a.click();
+    }
+
+    // PWA Offline Support
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('https://siwonelic2-blip.github.io/MBA-Kaloba-Loan/index.html');
+    }
+</script>
 </body>
 </html>
