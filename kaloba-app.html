@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kaloba Loan System — lightweight offline-first loan management for small owners.">
+    <meta name="author" content="Kaloba">
+    <meta name="theme-color" content="#667eea">
+    <title>Kaloba Loan System - Web App</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23667eea'/%3E%3Ctext x='50' y='57' font-size='50' text-anchor='middle' fill='white' font-family='Segoe UI,Arial' %3EK%3C/text%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .user-info strong {
+            font-size: 16px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .online {
+            background-color: #4CAF50;
+        }
+
+        .offline {
+            background-color: #FF6B6B;
+        }
+
+        .logout-btn {
+            background-color: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background-color: #FF5252;
+        }
+
+        .sync-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+
+        .sync-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .sync-btn:disabled {
+            background-color: #CCCCCC;
+            cursor: not-allowed;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .main-content.active {
+            display: block;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .menu-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-section {
+            display: none;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 500px;
+        }
+
+        .form-container h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .table-container h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead {
+            background: #f0f0f0;
+        }
+
+        table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .statement {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .statement h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .statement-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .statement-row strong {
+            font-weight: 600;
+        }
+
+        .statement-total {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #c62828;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #1565c0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .cancel-btn {
+            background: #999;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-left: 10px;
+        }
+
+        .cancel-btn:hover {
+            background: #777;
+        }
+
+        .filter-container {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-container select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .sync-log {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .sync-log p {
+            margin: 5px 0;
+        }
+
+        .last-sync {
+            color: #667eea;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        <div class="error" style="margin:10px;">JavaScript is required for this application to work. Please enable JavaScript in your browser.</div>
+    </noscript>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h2>🏦 MBA Kaloba Loan System</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="ownerSelect">Select Owner:</label>
+                    <select id="ownerSelect" required>
+                        <option value="">-- Choose your owner --</option>
+                        <option value="friday">Friday</option>
+                        <option value="mukosha">Mukosha</option>
+                        <option value="beatrice">Beatrice</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="passwordInput">Password:</label>
+                    <input type="password" id="passwordInput" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+                Default password: 1234
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainApp" class="container">
+        <div class="header">
+            <div>
+                <h1>🏦 Kaloba Loan System</h1>
+            </div>
+            <div class="user-info">
+                <p><span class="status-indicator" id="statusIndicator"></span> <span id="networkStatus">Checking...</span></p>
+                <p>Owner: <strong id="currentOwner"></strong></p>
+                <p>Owner ID: <strong id="currentTown"></strong></p>
+                <button class="sync-btn" id="syncBtn" title="Sync data with cloud">📤 Sync</button>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <!-- MENU -->
+            <div class="menu">
+                <button class="menu-btn" data-section="register">➕ Register Client</button>
+                <button class="menu-btn" data-section="loan">💰 Record Loan</button>
+                <button class="menu-btn" data-section="repayment">💵 Record Repayment</button>
+                <button class="menu-btn" data-section="balance">📊 Check Balance</button>
+                <button class="menu-btn" data-section="interest">📈 Add Monthly Interest</button>
+                <button class="menu-btn" data-section="list">📋 All Clients</button>
+            </div>
+
+            <!-- MESSAGES -->
+            <div id="messageContainer" aria-live="polite" role="status"></div>
+
+            <!-- REGISTER CLIENT -->
+            <div id="register" class="content-section">
+                <div class="form-container">
+                    <h3>Register New Client</h3>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="clientName">Full Name:</label>
+                            <input type="text" id="clientName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientNRC">NRC Number:</label>
+                            <input type="text" id="clientNRC" placeholder="e.g., 123456/01/1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientPhone">Phone Number:</label>
+                            <input type="tel" id="clientPhone" required autocomplete="tel" pattern="[0-9+\-() ]{6,}" title="Enter a valid phone number">
+                        </div>
+                        <button type="submit" class="submit-btn">Register</button>
+                        <button type="button" class="cancel-btn" data-section="register">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RECORD LOAN -->
+            <div id="loan" class="content-section">
+                <div class="form-container">
+                    <h3>Record Loan Given</h3>
+                    <form id="loanForm">
+                        <div class="form-group">
+                            <label for="loanClientSelect">Client Name:</label>
+                            <select id="loanClientSelect" required>
+                                <option value="">-- Select client --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="loanAmount">Loan Amount (ZMW):</label>
+                            <input type="number" id="loanAmount" step="0.01" min="0" required inputmode="decimal" autocomplete="off">
+                        </div>
+                        <button type="submit" class="submit-btn">Record Loan</button>
+                        <button type="button" class="cancel-btn" data-section="loan">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RECORD REPAYMENT -->
+            <div id="repayment" class="content-section">
+                <div class="form-container">
+                    <h3>Record Repayment</h3>
+                    <form id="repaymentForm">
+                        <div class="form-group">
+                            <label for="repaymentClientSelect">Client Name:</label>
+                            <select id="repaymentClientSelect" required>
+                                <option value="">-- Select client --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="repaymentAmount">Repayment Amount (ZMW):</label>
+                            <input type="number" id="repaymentAmount" step="0.01" min="0" required inputmode="decimal" autocomplete="off">
+                        </div>
+                        <button type="submit" class="submit-btn">Record Repayment</button>
+                        <button type="button" class="cancel-btn" data-section="repayment">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- CHECK BALANCE -->
+            <div id="balance" class="content-section">
+                <div class="form-container">
+                    <h3>Check Loan Balance</h3>
+                    <form id="balanceForm">
+                        <div class="form-group">
+                            <label for="balanceClientSelect">Client Name:</label>
+                            <select id="balanceClientSelect" required>
+                                <option value="">-- Select client --</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-btn">Check Balance</button>
+                        <button type="button" class="cancel-btn" data-section="balance">Cancel</button>
+                    </form>
+                </div>
+                <div id="statementContainer"></div>
+            </div>
+
+            <!-- CALCULATE INTEREST -->
+            <div id="interest" class="content-section">
+                <div class="form-container">
+                    <h3>Add Monthly Interest (5%)</h3>
+                    <form id="interestForm">
+                        <div class="form-group">
+                            <label for="interestClientSelect">Client Name:</label>
+                            <select id="interestClientSelect" required>
+                                <option value="">-- Select client --</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-btn">Add Interest</button>
+                        <button type="button" class="cancel-btn" data-section="interest">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- LIST ALL CLIENTS -->
+            <div id="list" class="content-section">
+                <div class="table-container">
+                    <h3>All Clients</h3>
+                    <div class="filter-container">
+                        <select id="clientFilter">
+                            <option value="all">All Status</option>
+                            <option value="active">Active Loans</option>
+                            <option value="cleared">Cleared</option>
+                        </select>
+                    </div>
+                    <table id="clientsTable">
+                        <thead>
+                            <tr>
+                                <th>Client Name</th>
+                                <th>NRC</th>
+                                <th>Phone</th>
+                                <th>Loan Amount</th>
+                                <th>Balance</th>
+                                <th>Owner</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════
+        // CONFIGURATION
+        // ═══════════════════════════════════════════════════════════════════
+        const INTEREST_RATE = 0.05; // 5% monthly
+        const OWNERS = {
+            friday: { name: 'Friday', password: '1234' },
+            mukosha: { name: 'Mukosha', password: '1234' },
+            beatrice: { name: 'Beatrice', password: '1234' }
+        };
+
+        // ═══════════════════════════════════════════════════════════════════
+        // STATE MANAGEMENT
+        // ═══════════════════════════════════════════════════════════════════
+        let currentUser = null;
+        let clients = [];
+        let isOnline = navigator.onLine;
+
+        // ═══════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════
+        window.addEventListener('load', () => {
+            loadData();
+            checkNetworkStatus();
+            updateNetworkIndicator();
+        });
+
+        window.addEventListener('online', () => {
+            isOnline = true;
+            updateNetworkIndicator();
+            showMessage('You are now online. Ready to sync!', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            updateNetworkIndicator();
+            showMessage('You are now offline. Changes will be saved locally.', 'info');
+        });
+
+        // ═══════════════════════════════════════════════════════════════════
+        // NETWORK STATUS
+        // ═══════════════════════════════════════════════════════════════════
+        function checkNetworkStatus() {
+            isOnline = navigator.onLine;
+            updateNetworkIndicator();
+        }
+
+        function updateNetworkIndicator() {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('networkStatus');
+            
+            if (isOnline) {
+                indicator.className = 'status-indicator online';
+                statusText.textContent = '🟢 Online';
+                document.getElementById('syncBtn').disabled = false;
+            } else {
+                indicator.className = 'status-indicator offline';
+                statusText.textContent = '🔴 Offline';
+                document.getElementById('syncBtn').disabled = true;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // AUTHENTICATION
+        // ═══════════════════════════════════════════════════════════════════
+        function getCurrentOwnerKey() {
+            return currentUser?.username || currentUser?.town || '';
+        }
+
+        function getCurrentOwnerDisplayName() {
+            return currentUser?.displayName || currentUser?.name || OWNERS[getCurrentOwnerKey()]?.name || 'Unknown';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const owner = document.getElementById('ownerSelect').value;
+            const password = document.getElementById('passwordInput').value;
+
+            if (!owner || !OWNERS[owner]) {
+                showMessage('Please select a valid owner', 'error');
+                return;
+            }
+
+            if (password !== OWNERS[owner].password) {
+                showMessage('Invalid password', 'error');
+                return;
+            }
+
+            currentUser = {
+                username: owner,
+                displayName: OWNERS[owner].name,
+                town: owner,
+                loginTime: new Date().toISOString()
+            };
+
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('mainContent').classList.add('active');
+            document.getElementById('currentOwner').textContent = getCurrentOwnerDisplayName();
+            document.getElementById('currentTown').textContent = getCurrentOwnerKey();
+
+            loadData();
+            updateAllSelects();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('mainContent').classList.remove('active');
+            document.getElementById('loginForm').reset();
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('ownerSelect').value = '';
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DATA MANAGEMENT
+        // ═══════════════════════════════════════════════════════════════════
+        function loadData() {
+            const ownerKey = getCurrentOwnerKey();
+            let stored = localStorage.getItem(`clients_${ownerKey}`);
+            if (!stored) {
+                stored = localStorage.getItem(`borrowers_${ownerKey}`);
+            }
+            clients = stored ? JSON.parse(stored) : [];
+        }
+
+        function saveData() {
+            const ownerKey = getCurrentOwnerKey();
+            const payload = JSON.stringify(clients);
+            localStorage.setItem(`clients_${ownerKey}`, payload);
+            localStorage.setItem(`borrowers_${ownerKey}`, payload);
+            localStorage.setItem(`lastModified_${ownerKey}`, new Date().toISOString());
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // SYNC DATA
+        // ═══════════════════════════════════════════════════════════════════
+        function syncData() {
+            if (!isOnline) {
+                showMessage('You are offline. Cannot sync now.', 'error');
+                return;
+            }
+
+            document.getElementById('syncBtn').disabled = true;
+            document.getElementById('syncBtn').textContent = '⏳ Syncing...';
+
+            // Simulate cloud sync
+            setTimeout(() => {
+                const syncData = {
+                    owner: getCurrentOwnerKey(),
+                    clients: clients,
+                    borrowers: clients,
+                    timestamp: new Date().toISOString()
+                };
+
+                localStorage.setItem(`synced_${getCurrentOwnerKey()}`, JSON.stringify(syncData));
+                localStorage.setItem(`lastSync_${getCurrentOwnerKey()}`, new Date().toISOString());
+
+                showMessage('✅ Data synced successfully!', 'success');
+                document.getElementById('syncBtn').disabled = false;
+                document.getElementById('syncBtn').textContent = '📤 Sync';
+            }, 1500);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CLIENT FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════
+        function findClient(nrc) {
+            return clients.findIndex(c => c.nrc.toLowerCase() === nrc.toLowerCase());
+        }
+
+        function registerClient(event) {
+            event.preventDefault();
+            const name = document.getElementById('clientName').value.trim();
+            const nrc = document.getElementById('clientNRC').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+
+            if (!name || !nrc || !phone) {
+                showMessage('Please complete all client registration fields.', 'error');
+                return;
+            }
+
+            if (findClient(nrc) !== -1) {
+                showMessage(`Client with NRC '${nrc}' is already registered!`, 'error');
+                return;
+            }
+
+            const ownerKey = getCurrentOwnerKey();
+            const ownerDisplay = getCurrentOwnerDisplayName();
+
+            clients.push({
+                id: Date.now(),
+                name: name,
+                nrc: nrc,
+                phone: phone,
+                loan_amount: 0,
+                amount_repaid: 0,
+                months: 0,
+                date_registered: new Date().toLocaleDateString(),
+                dateCreated: new Date().toISOString(),
+                owner: ownerKey,
+                ownerDisplayName: ownerDisplay
+            });
+
+            saveData();
+            showMessage(`Client '${name}' registered successfully!`, 'success');
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientNRC').value = '';
+            document.getElementById('clientPhone').value = '';
+            updateAllSelects();
+        }
+
+        function recordLoan(event) {
+            event.preventDefault();
+            const selectedOption = document.getElementById('loanClientSelect').value;
+            const amount = parseFloat(document.getElementById('loanAmount').value);
+
+            if (!selectedOption || amount <= 0) {
+                showMessage('Please select a client and enter a valid amount', 'error');
+                return;
+            }
+
+            const clientId = Number(selectedOption);
+            const client = clients.find(c => c.id === clientId);
+            if (!client) {
+                showMessage('Selected client could not be found.', 'error');
+                return;
+            }
+
+            client.loan_amount += amount;
+            client.months = 1;
+            client.date_loaned = new Date().toLocaleDateString();
+
+            saveData();
+            showMessage(`Loan of ZMW ${amount.toFixed(2)} recorded for ${client.name}`, 'success');
+            document.getElementById('loanAmount').value = '';
+            document.getElementById('loanClientSelect').value = '';
+            updateAllSelects();
+        }
+
+        function recordRepayment(event) {
+            event.preventDefault();
+            const selectedOption = document.getElementById('repaymentClientSelect').value;
+            const amount = parseFloat(document.getElementById('repaymentAmount').value);
+
+            if (!selectedOption || amount <= 0) {
+                showMessage('Please select a client and enter a valid amount', 'error');
+                return;
+            }
+
+            const clientId = Number(selectedOption);
+            const client = clients.find(c => c.id === clientId);
+            if (!client) {
+                showMessage('Selected client could not be found.', 'error');
+                return;
+            }
+
+            const balance = calculateBalance(client).balance;
+
+            if (balance <= 0) {
+                showMessage(`${client.name} has no outstanding balance!`, 'error');
+                return;
+            }
+
+            if (amount > balance) {
+                showMessage(`Repayment exceeds balance. Maximum is ZMW ${balance.toFixed(2)}`, 'error');
+                return;
+            }
+
+            client.amount_repaid += amount;
+            saveData();
+
+            const newBalance = balance - amount;
+            showMessage(`Repayment of ZMW ${amount.toFixed(2)} recorded. Remaining balance: ZMW ${newBalance.toFixed(2)}`, 'success');
+            document.getElementById('repaymentAmount').value = '';
+            document.getElementById('repaymentClientSelect').value = '';
+            updateAllSelects();
+        }
+
+        function checkBalance(event) {
+            event.preventDefault();
+            const selectedOption = document.getElementById('balanceClientSelect').value;
+
+            if (!selectedOption) {
+                showMessage('Please select a client', 'error');
+                return;
+            }
+
+            const clientId = Number(selectedOption);
+            const client = clients.find(c => c.id === clientId);
+            if (!client) {
+                showMessage('Selected client could not be found.', 'error');
+                return;
+            }
+            const { balance, interest } = calculateBalance(client);
+
+            const html = `
+                <div class="statement">
+                    <h3>Loan Statement for: ${client.name}</h3>
+                    <div class="statement-row">
+                        <span>NRC:</span>
+                        <strong>${client.nrc}</strong>
+                    </div>
+                    <div class="statement-row">
+                        <span>Phone:</span>
+                        <strong>${client.phone}</strong>
+                    </div>
+                    <div class="statement-row">
+                        <span>Registered:</span>
+                        <strong>${client.date_registered}</strong>
+                    </div>
+                    <div class="statement-row">
+                        <span>Original Loan:</span>
+                        <strong>ZMW ${client.loan_amount.toFixed(2)}</strong>
+                    </div>
+                    <div class="statement-row">
+                        <span>Interest (5% × ${client.months} month${client.months !== 1 ? 's' : ''}):</span>
+                        <strong>ZMW ${interest.toFixed(2)}</strong>
+                    </div>
+                    <div class="statement-row">
+                        <span>Amount Repaid:</span>
+                        <strong>ZMW ${client.amount_repaid.toFixed(2)}</strong>
+                    </div>
+                    <div class="statement-total">
+                        <div class="statement-row">
+                            <span>BALANCE REMAINING:</span>
+                            <strong>ZMW ${balance.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('statementContainer').innerHTML = html;
+        }
+
+        function calculateInterest(event) {
+            event.preventDefault();
+            const selectedOption = document.getElementById('interestClientSelect').value;
+
+            if (!selectedOption) {
+                showMessage('Please select a client', 'error');
+                return;
+            }
+
+            const clientId = Number(selectedOption);
+            const client = clients.find(c => c.id === clientId);
+            if (!client) {
+                showMessage('Selected client could not be found.', 'error');
+                return;
+            }
+
+            if (client.loan_amount === 0) {
+                showMessage('This client has no active loan', 'error');
+                return;
+            }
+
+            client.months += 1;
+            saveData();
+
+            const { balance, interest } = calculateBalance(client);
+            showMessage(
+                `Month ${client.months} interest added for ${client.name}. ` +
+                `Total interest: ZMW ${interest.toFixed(2)}, New balance: ZMW ${balance.toFixed(2)}`,
+                'success'
+            );
+            updateAllSelects();
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CALCULATIONS
+        // ═══════════════════════════════════════════════════════════════════
+        function calculateBalance(client) {
+            const loan = client.loan_amount;
+            const repaid = client.amount_repaid;
+            const months = client.months;
+            const interest = loan * INTEREST_RATE * months;
+            const balance = loan + interest - repaid;
+            return { balance: Math.max(0, balance), interest };
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // UI FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.add('active');
+
+                if (sectionId === 'list') {
+                    updateClientsList();
+                }
+            }
+        }
+
+        function getVisibleClients() {
+            const ownerKey = getCurrentOwnerKey();
+            return clients.filter(client => client.owner === ownerKey || currentUser?.isAdmin);
+        }
+
+        function updateAllSelects() {
+            const selects = [
+                'loanClientSelect',
+                'repaymentClientSelect',
+                'balanceClientSelect',
+                'interestClientSelect'
+            ];
+
+            const visibleClients = getVisibleClients();
+
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">-- Select client --</option>';
+
+                visibleClients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = client.name;
+                    select.appendChild(option);
+                });
+
+                select.value = currentValue;
+            });
+        }
+
+        function updateClientsList() {
+            const filter = document.getElementById('clientFilter').value;
+            const tbody = document.getElementById('clientsTableBody');
+            tbody.innerHTML = '';
+
+            let totalOutstanding = 0;
+            const visibleClients = getVisibleClients();
+
+            visibleClients.forEach(client => {
+                const { balance } = calculateBalance(client);
+                const status = balance > 0 ? 'Active' : 'Cleared';
+
+                if (filter === 'active' && status !== 'Active') return;
+                if (filter === 'cleared' && status !== 'Cleared') return;
+
+                totalOutstanding += balance;
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${client.name}</td>
+                    <td>${client.nrc}</td>
+                    <td>${client.phone}</td>
+                    <td>ZMW ${client.loan_amount.toFixed(2)}</td>
+                    <td>ZMW ${balance.toFixed(2)}</td>
+                    <td>${client.ownerDisplayName || client.owner}</td>
+                    <td>${status}</td>
+                `;
+            });
+
+            const row = tbody.insertRow();
+            row.style.background = '#f0f0f0';
+            row.innerHTML = `
+                <td colspan="4"><strong>Total Outstanding:</strong></td>
+                <td><strong>ZMW ${totalOutstanding.toFixed(2)}</strong></td>
+                <td></td>
+                <td></td>
+            `;
+        }
+
+        function showMessage(text, type) {
+            const container = document.getElementById('messageContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = text;
+
+            container.innerHTML = '';
+            container.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // INITIALIZE APP
+        // ═══════════════════════════════════════════════════════════════════
+        function checkAuth() {
+            const stored = localStorage.getItem('currentUser');
+            if (stored) {
+                try {
+                    currentUser = JSON.parse(stored);
+                    if (!currentUser.username && currentUser.town) {
+                        currentUser.username = currentUser.town;
+                    }
+                    if (!currentUser.displayName) {
+                        currentUser.displayName = currentUser.name || OWNERS[getCurrentOwnerKey()]?.name || currentUser.displayName;
+                    }
+                    loadData();
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('mainContent').classList.add('active');
+                    document.getElementById('currentOwner').textContent = getCurrentOwnerDisplayName();
+                    document.getElementById('currentTown').textContent = getCurrentOwnerKey();
+                    updateAllSelects();
+                } catch (e) {
+                    localStorage.removeItem('currentUser');
+                }
+            }
+        }
+
+        // Run auth check on page load
+        window.addEventListener('load', checkAuth);
+
+    // Attach unobtrusive event listeners
+    function initEventListeners(){
+        try {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) loginForm.addEventListener('submit', handleLogin);
+
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) registerForm.addEventListener('submit', registerClient);
+
+            const loanForm = document.getElementById('loanForm');
+            if (loanForm) loanForm.addEventListener('submit', recordLoan);
+
+            const repaymentForm = document.getElementById('repaymentForm');
+            if (repaymentForm) repaymentForm.addEventListener('submit', recordRepayment);
+
+            const balanceForm = document.getElementById('balanceForm');
+            if (balanceForm) balanceForm.addEventListener('submit', checkBalance);
+
+            const interestForm = document.getElementById('interestForm');
+            if (interestForm) interestForm.addEventListener('submit', calculateInterest);
+
+            const syncBtn = document.getElementById('syncBtn');
+            if (syncBtn) syncBtn.addEventListener('click', syncData);
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+
+            document.querySelectorAll('[data-section]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const s = btn.getAttribute('data-section');
+                    if (s) showSection(s);
+                });
+            });
+
+            document.querySelectorAll('.cancel-btn[data-section]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const s = btn.getAttribute('data-section');
+                    if (s) showSection(s);
+                });
+            });
+            const clientFilter = document.getElementById('clientFilter');
+            if (clientFilter) clientFilter.addEventListener('change', updateClientsList);
+        } catch (e) {
+            console.error('Event listener init error', e);
+        }
+    }
+
+    window.addEventListener('load', initEventListeners);
+    </script>
+</body>
+</html>
